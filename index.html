@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080607">
+<title>HAYAM: THIRTEEN HEARTS</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050405;color:#eee;font-family:Georgia,"Times New Roman",serif}
+button,input{font:inherit}
+#intro{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;text-align:center;background:
+radial-gradient(circle at 50% 40%,rgba(100,0,15,.18),transparent 35%),
+linear-gradient(#090708,#020202)}
+#intro .box{width:min(88vw,520px);padding:30px 20px}
+#intro h1{font-size:clamp(45px,13vw,78px);letter-spacing:.14em;margin:0;color:#d8d2ce;text-shadow:0 0 20px #000}
+#intro h2{margin:5px 0 35px;color:#9d1524;letter-spacing:.34em;font-size:clamp(13px,4vw,20px)}
+#intro p{color:#9b9494;line-height:1.5}
+.mainBtn{border:1px solid #6c1822;background:#13090b;color:#e8dddd;padding:15px 26px;letter-spacing:.13em;border-radius:4px;box-shadow:0 0 20px #25070c}
+#game{position:fixed;inset:0;display:none;background:#080708}
+#hud{position:absolute;z-index:8;left:12px;top:10px;right:12px;display:flex;justify-content:space-between;pointer-events:none;text-shadow:0 2px 5px #000;font-family:Arial,sans-serif}
+#hud .title{font-weight:700;letter-spacing:.1em;font-size:13px}
+#count{font-size:13px;color:#d3b8bc}
+#viewport{position:absolute;inset:0;overflow:hidden}
+#world{position:absolute;width:1000px;height:760px;transform-origin:0 0;background:#070606}
+.room{position:absolute;border:10px solid #282221;background:
+linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px) 0 0/38px 38px,
+linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px) 0 0/38px 38px,
+#151111;box-shadow:inset 0 0 40px #050404}
+.room:after{content:attr(data-name);position:absolute;left:12px;top:10px;color:#5b5050;font:700 12px Arial,sans-serif;letter-spacing:.18em}
+#living{left:80px;top:90px;width:390px;height:280px}
+#kitchen{left:460px;top:90px;width:350px;height:280px;background-color:#121313}
+#hall{left:330px;top:360px;width:300px;height:150px;background-color:#11100f}
+#bedroom{left:80px;top:500px;width:360px;height:220px;background-color:#121012}
+#bathroom{left:430px;top:500px;width:200px;height:220px;background-color:#101314}
+#entry{left:620px;top:360px;width:190px;height:360px;background-color:#12100f}
+.door{position:absolute;background:#55483e;border:3px solid #211b18;box-shadow:inset 0 0 0 2px #382e28}
+.obj{position:absolute;filter:drop-shadow(0 7px 6px #000);z-index:2}
+.table{width:110px;height:70px;background:#49372b;border:6px solid #2c211b;border-radius:3px}
+.sofa{width:150px;height:58px;background:#302a2a;border:7px solid #1b1717;border-radius:12px;box-shadow:inset 0 0 0 3px #443939}
+.bookcase{width:42px;height:145px;background:repeating-linear-gradient(0deg,#3b2a21 0 9px,#181212 9px 15px);border:6px solid #271b16}
+.lamp{width:20px;height:65px;background:linear-gradient(90deg,#282323,#777,#242020)}
+.lamp:before{content:"";position:absolute;width:48px;height:30px;left:-14px;top:-15px;background:#59494a;clip-path:polygon(20% 0,80% 0,100% 100%,0 100%)}
+.counter{height:55px;background:#393838;border:6px solid #242323}
+.fridge{width:72px;height:115px;background:#34393a;border:6px solid #202425;border-radius:3px}
+.sink{width:80px;height:50px;background:#54595a;border:7px solid #292d2e;border-radius:7px}
+.sink:after{content:"";position:absolute;width:25px;height:24px;border:4px solid #6d7273;border-bottom:0;border-radius:15px 15px 0 0;left:22px;top:-25px}
+.bed{width:150px;height:92px;background:#3b3236;border:8px solid #241e21;border-radius:4px}
+.bed:before{content:"";position:absolute;left:8px;top:8px;width:48px;height:28px;background:#746a6c;border-radius:6px}
+.photo{width:50px;height:62px;background:#4b4037;border:6px solid #261e19}
+.photo:after{content:"♥";position:absolute;inset:0;display:grid;place-items:center;color:#6d2630;font-size:22px}
+.mirror{width:65px;height:95px;border:7px solid #413934;background:linear-gradient(135deg,#303b40,#111517 50%,#354147)}
+.toilet{width:54px;height:72px;background:#777;border-radius:16px 16px 25px 25px;border:6px solid #404344}
+.clock{width:46px;height:46px;border-radius:50%;background:#d0c7b4;border:7px solid #322a25}
+.clock:after{content:"";position:absolute;left:20px;top:8px;width:3px;height:16px;background:#2a2522;transform-origin:bottom;transform:rotate(35deg)}
+.window{width:90px;height:18px;background:#1a2228;border:5px solid #443a34;box-shadow:0 0 18px rgba(100,120,130,.12)}
+.key{font-size:33px;color:#8c7960;text-shadow:0 3px 4px #000}
+#player{position:absolute;width:28px;height:34px;z-index:6;transform:translate(-50%,-50%)}
+#player:before{content:"";position:absolute;left:7px;top:0;width:14px;height:14px;border-radius:50%;background:#c9b8ac;box-shadow:0 0 8px #000}
+#player:after{content:"";position:absolute;left:4px;top:13px;width:20px;height:21px;border-radius:8px 8px 5px 5px;background:#4a4146;box-shadow:0 4px 5px #000}
+#heart{position:absolute;z-index:7;font-size:35px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 10px #b10020);animation:pulse 1.1s infinite alternate}
+@keyframes pulse{to{transform:translate(-50%,-50%) scale(1.22);filter:drop-shadow(0 0 19px #e00030)}}
+#darkness{position:absolute;inset:0;z-index:5;pointer-events:none;background:radial-gradient(circle 145px at var(--lx,50%) var(--ly,50%),transparent 0,rgba(0,0,0,.13) 40%,rgba(0,0,0,.82) 76%,rgba(0,0,0,.97) 100%)}
+#grain{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:.08;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#controls{position:absolute;z-index:12;left:18px;bottom:18px;width:150px;height:150px}
+.ctrl{position:absolute;width:50px;height:50px;border-radius:50%;border:1px solid #665b5d;background:rgba(25,20,21,.72);color:#c9bfc0;font:24px Arial,sans-serif;touch-action:none}
+#up{left:50px;top:0}#left{left:0;top:50px}#right{left:100px;top:50px}#down{left:50px;top:100px}
+#hint{position:absolute;right:14px;bottom:18px;z-index:9;color:#776e6f;font:11px Arial,sans-serif;text-align:right}
+.overlay{position:fixed;inset:0;z-index:40;background:rgba(2,1,2,.92);display:none;align-items:center;justify-content:center;padding:20px}
+.card{width:min(92vw,500px);max-height:90vh;overflow:auto;background:#100c0d;border:1px solid #5d1a24;padding:24px;border-radius:5px;box-shadow:0 0 50px #000;text-align:center}
+.card .tiny{font:12px Arial,sans-serif;letter-spacing:.2em;color:#8e777a}
+.card h3{color:#a82c3b;letter-spacing:.12em}
+.poem{font-style:italic;line-height:1.65;color:#ddd0d1;white-space:pre-line}
+.answer{width:100%;margin:16px 0 10px;background:#080607;border:1px solid #514547;color:white;padding:13px;text-align:center;border-radius:3px}
+.feedback{height:22px;color:#a53b47;font:13px Arial,sans-serif}
+#ending .card{text-align:left}
+#ending h2{text-align:center;color:#b32c3c;letter-spacing:.12em}
+#ending p{line-height:1.7;color:#ddd3d4}
+@media(min-width:800px){#controls{opacity:.7}}
+</style>
+</head>
+<body>
+<div id="intro"><div class="box">
+<h1>HAYAM</h1><h2>THIRTEEN HEARTS</h2>
+<p>Somewhere inside this abandoned house, thirteen hearts are waiting.<br><br>Each one remembers something.</p>
+<button class="mainBtn" id="enter">ENTER THE HOUSE</button>
+</div></div>
+
+<div id="game">
+<div id="hud"><div class="title">THIRTEEN HEARTS</div><div id="count">HEARTS 0 / 13</div></div>
+<div id="viewport"><div id="world">
+<div class="room" id="living" data-name="LIVING ROOM"></div>
+<div class="room" id="kitchen" data-name="KITCHEN"></div>
+<div class="room" id="hall" data-name="HALLWAY"></div>
+<div class="room" id="bedroom" data-name="BEDROOM"></div>
+<div class="room" id="bathroom" data-name="BATHROOM"></div>
+<div class="room" id="entry" data-name="ENTRANCE"></div>
+
+<div class="obj sofa" style="left:130px;top:145px"></div>
+<div class="obj table" style="left:275px;top:205px"></div>
+<div class="obj bookcase" style="left:95px;top:195px"></div>
+<div class="obj lamp" style="left:415px;top:155px"></div>
+<div class="obj photo" style="left:350px;top:120px"></div>
+<div class="obj window" style="left:225px;top:91px"></div>
+
+<div class="obj counter" style="left:490px;top:120px;width:275px"></div>
+<div class="obj fridge" style="left:705px;top:210px"></div>
+<div class="obj sink" style="left:535px;top:250px"></div>
+
+<div class="obj clock" style="left:450px;top:405px"></div>
+<div class="obj key" style="left:555px;top:430px">⚿</div>
+
+<div class="obj bed" style="left:125px;top:565px"></div>
+<div class="obj mirror" style="left:350px;top:570px"></div>
+<div class="obj window" style="left:210px;top:702px"></div>
+
+<div class="obj sink" style="left:470px;top:555px"></div>
+<div class="obj toilet" style="left:550px;top:625px"></div>
+
+<div class="door" style="left:410px;top:353px;width:55px;height:15px"></div>
+<div class="door" style="left:615px;top:420px;width:20px;height:55px"></div>
+<div class="door" style="left:350px;top:493px;width:55px;height:15px"></div>
+<div class="door" style="left:500px;top:493px;width:55px;height:15px"></div>
+<div class="door" style="left:685px;top:700px;width:60px;height:14px"></div>
+
+<div id="heart">♥</div><div id="player"></div>
+</div><div id="darkness"></div><div id="grain"></div></div>
+<div id="controls"><button class="ctrl" id="up">▲</button><button class="ctrl" id="left">◀</button><button class="ctrl" id="right">▶</button><button class="ctrl" id="down">▼</button></div>
+<div id="hint">MOVE WITH ARROWS / WASD<br>TOUCH THE HEART</div>
+</div>
+
+<div class="overlay" id="riddle"><div class="card">
+<div class="tiny" id="heartNo">HEART I</div><h3>A HEART REMEMBERS</h3>
+<div class="poem" id="poem"></div>
+<input class="answer" id="answer" autocomplete="off" placeholder="What am I?">
+<button class="mainBtn" id="submit">ANSWER</button><div class="feedback" id="feedback"></div>
+</div></div>
+
+<div class="overlay" id="ending"><div class="card">
+<h2>THIRTEEN HEARTS</h2>
+<p><b>My dearest Hayam,</b></p>
+<p>If you're reading this, then you've found every heart I left for you.</p>
+<p>I wanted to tell you how I feel, but somehow writing it down was easier than saying it.</p>
+<p>I love the way you make ordinary moments feel special. I love your smile, your voice, and even the little things you probably don't realize I notice.</p>
+<p>Every heart you found carried a little piece of what I wanted to say.</p>
+<p>Thirteen hearts, thirteen little reminders of how much you mean to me.</p>
+<p>I don't need a perfect moment to tell you this.</p>
+<p><b>I love you, Hayam. ❤️</b></p>
+<p>And no matter how dark things become, I want you to remember that there is always something worth holding onto.</p>
+<p style="text-align:center;font-size:24px"><b>Me. ❤️</b></p>
+</div></div>
+
+<script>
+const riddles=[
+["I hold words meant for only one,\nFolded away when writing is done.\nNot a book, though stories I tether—\nOpen me gently; I keep them together.","letter",[350,120]],
+["Four legs below, no feet that roam,\nI wait where quiet things find home.\nPlates, hands, secrets gather around—\nLook where wooden edges are found.","table",[330,240]],
+["I copy your smile but never your heart,\nWe face one another, yet stay worlds apart.\nIn silver silence I borrow your face—\nFind me watching from my place.","mirror",[382,615]],
+["Winter lives inside my door,\nKeeping what was warm before.\nCold breath waits behind my seal—\nFind the heart beside the chill.","freezer",[740,250]],
+["Water whispers where hands become clean,\nMetal and porcelain, cold and serene.\nTurn me and watch the small river begin—\nThe next little heart waits close to the sink.","sink",[575,275]],
+["I carry a thousand voices but never speak,\nOpen my body for the worlds that you seek.\nPages are doors held under one cover—\nLook where old stories sleep together.","book",[115,245]],
+["I make a small sun when night settles in,\nA circle of warmth where shadows grow thin.\nI stand without walking and brighten the gloom—\nFind me glowing inside the room.","lamp",[425,170]],
+["I have hands but cannot hold yours,\nI count every second behind closed doors.\nRound and patient, I never stop—\nFind me where the quiet minutes drop.","clock",[473,428]],
+["Small enough to hide inside your hand,\nYet I can open what walls command.\nTeeth without hunger, metal without breath—\nFind me waiting in the hall's darkness.","key",[570,445]],
+["I show you the world but never step outside,\nRain taps my face while I stay inside.\nGlass is the border between there and here—\nFind the next heart waiting near.","window",[255,690]],
+["At the end of the day I carry your dreams,\nBlankets above me, soft at the seams.\nYou close your eyes while I stay below—\nFind where tired hearts usually go.","bed",[200,610]],
+["I steal one moment and make it remain,\nA smile can survive me through distance and rain.\nI cannot remember, yet memories I show—\nFind the framed moment from long ago.","photo",[375,150]],
+["You crossed every room and followed each sign,\nTwelve little hearts led your steps into mine.\nFor the final one, return where it began—\nThe last heart waits where you first entered in.","entrance",[715,655]]
+];
+const roman=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII"];
+let idx=0, px=710, py=640, keys={}, open=false;
+const world=document.getElementById("world"), player=document.getElementById("player"), heart=document.getElementById("heart");
+const darkness=document.getElementById("darkness"), viewport=document.getElementById("viewport");
+function place(){player.style.left=px+"px";player.style.top=py+"px";heart.style.left=riddles[idx][2][0]+"px";heart.style.top=riddles[idx][2][1]+"px";camera()}
+function camera(){
+ let s=Math.min(innerWidth/520,innerHeight/620); s=Math.max(.72,Math.min(1.15,s));
+ let ox=innerWidth/2-px*s, oy=innerHeight/2-py*s;
+ ox=Math.min(0,Math.max(innerWidth-1000*s,ox)); oy=Math.min(0,Math.max(innerHeight-760*s,oy));
+ world.style.transform=`translate(${ox}px,${oy}px) scale(${s})`;
+ darkness.style.setProperty("--lx",(px*s+ox)+"px");darkness.style.setProperty("--ly",(py*s+oy)+"px");
+}
+function valid(x,y){
+ // simplified walkable union of rooms; furniture doesn't block so mobile movement stays forgiving
+ return (x>90&&x<800&&y>100&&y<710);
+}
+function tick(){
+ if(!open){
+ let dx=(keys.right?1:0)-(keys.left?1:0),dy=(keys.down?1:0)-(keys.up?1:0), sp=3.2;
+ let nx=px+dx*sp,ny=py+dy*sp;if(valid(nx,ny)){px=nx;py=ny}
+ player.style.left=px+"px";player.style.top=py+"px";camera();
+ let h=riddles[idx][2];if(Math.hypot(px-h[0],py-h[1])<38)showRiddle();
+ } requestAnimationFrame(tick)
+}
+function showRiddle(){open=true;clearMovement();document.getElementById("heartNo").textContent="HEART "+roman[idx];document.getElementById("poem").textContent=riddles[idx][0];document.getElementById("answer").value="";document.getElementById("feedback").textContent="";document.getElementById("riddle").style.display="flex";setTimeout(()=>document.getElementById("answer").focus(),200)}
+function submit(){
+ let a=document.getElementById("answer").value.trim().toLowerCase().replace(/[^a-z]/g,"");
+ let target=riddles[idx][1];
+ if(a.includes(target)){
+  document.getElementById("riddle").style.display="none";idx++;
+  document.getElementById("count").textContent="HEARTS "+idx+" / 13";
+  if(idx>=13){open=true;document.getElementById("ending").style.display="flex";return}
+  open=false;place();
+ }else document.getElementById("feedback").textContent="The house stays silent. Try again.";
+}
+document.getElementById("submit").onclick=submit;document.getElementById("answer").addEventListener("keydown",e=>{if(e.key==="Enter")submit()});
+document.getElementById("enter").onclick=()=>{document.getElementById("intro").style.display="none";document.getElementById("game").style.display="block";place()};
+const map={ArrowUp:"up",w:"up",W:"up",ArrowDown:"down",s:"down",S:"down",ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right"};
+function pressDir(k){
+  // Only one direction on each axis can remain active.
+  if(k==="left") keys.right=false;
+  if(k==="right") keys.left=false;
+  if(k==="up") keys.down=false;
+  if(k==="down") keys.up=false;
+  keys[k]=true;
+}
+function clearMovement(){ keys={}; }
+
+addEventListener("keydown",e=>{
+  if(e.target.matches("input, textarea")) return;
+  if(map[e.key]){pressDir(map[e.key]);e.preventDefault()}
+});
+addEventListener("keyup",e=>{
+  if(e.target.matches("input, textarea")) return;
+  if(map[e.key])keys[map[e.key]]=false
+});
+addEventListener("blur",clearMovement);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)clearMovement()});
+["up","down","left","right"].forEach(k=>{
+  const b=document.getElementById(k);
+  b.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    pressDir(k);
+    try{b.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  const release=e=>{
+    keys[k]=false;
+    try{if(b.hasPointerCapture(e.pointerId))b.releasePointerCapture(e.pointerId)}catch(_){}
+  };
+  b.addEventListener("pointerup",release);
+  b.addEventListener("pointercancel",release);
+  b.addEventListener("lostpointercapture",()=>{keys[k]=false});
+});
+addEventListener("pointerup",e=>{
+  // Safety reset for mobile browsers that occasionally lose a button release.
+  if(e.pointerType==="touch" || e.pointerType==="pen") clearMovement();
+});
+addEventListener("resize",camera);place();tick();
+</script>
+</body></html>
